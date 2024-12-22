@@ -3,7 +3,8 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Todo Application</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <title>To-do Application</title>
     <style>
       * {
         margin: 0;
@@ -11,7 +12,7 @@
         box-sizing: border-box;
       }
       body {
-        font-family: Arial, sans-serif;
+        font-family: 'Inter', sans-serif;
         background-color: #f1eaf1;
         display: flex;
         justify-content: center;
@@ -166,7 +167,7 @@
   <body>
     <div class="container">
       <% if (user) { %>
-      <h3>Welcome to your todoapp, <%= user.username %>!</h3>
+      <h3>Welcome to your To-doapp, <%= user.username %>!</h3>
       <div class="main-content">
         <div class="form-container">
           <form action="/tasks/add" method="post">
