@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Todo Application</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f1eaf1;
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        height: 100vh;
+        color: #333;
+        padding: 20px;
+      }
+
+      .container {
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        align-items: flex-start;
+        background-color: #fff;
+        padding: 30px;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        width: 100%;
+        max-width: 1000px;
+        height: auto;
+      }
+
+      h3 {
+        font-size: 1.8rem;
+        margin-bottom: 20px;
+        color: #2c3e50;
+        width: 100%;
+        text-align: center;
+      }
+
+      .main-content {
+        display: flex;
+        justify-content: space-between;
+        width: 100%;
+      }
+
+      .form-container,
+      .task-list {
+        width: 45%;
+      }
+
+      p {
+        font-size: 1.2rem;
+        margin-bottom: 15px;
+        color: #7f8c8d;
+      }
+      .task-list h4{
+        font-size: 1.2rem;
+        margin-bottom: 15px;
+        color: #101111;
+      }
+      input,
+      select {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 15px;
+        border-radius: 5px;
+        border: 1px solid #ccc;
+        font-size: 1rem;
+        outline: none;
+      }
+
+      button {
+        width: 100%;
+        padding: 8px;
+        background-color: #3498db;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        font-size: 1rem;
+        cursor: pointer;
+      }
+
+      ul {
+        list-style-type: none;
+        padding: 0;
+        margin-top: 20px;
+      }
+
+      li {
+        background-color: #ecf0f1;
+        margin: 10px 0;
+        padding: 15px;
+        border-radius: 5px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .task-buttons {
+        display: flex;
+        gap: 7px;
+      }
+
+      .state-container {
+        padding: 5px 6px;
+        border-radius: 3px;
+        font-size: 0.9rem;
+        color: black;
+      }
+      .error {
+        color: red;
+        font-size: 1rem;
+        margin-bottom: 15px;
+      }
+
+      .state-pending {
+        background-color: #fefc9e;
+      }
+
+      .state-completed {
+        background-color: #2ecc71;
+      }
+
+      .logout-form {
+        margin-top: 20px;
+      }
+
+      .logout-form button {
+        background-color: #e74c3c;
+        width: auto;
+      }
+      .task-buttons button {
+        font-size: 0.8rem;
+      }
+      .task-buttons button.delete {
+        background-color: #df0404;
+      }
+      a {
+        color: #3498db;
+        text-decoration: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <% if (user) { %>
+      <h3>Welcome to your todoapp, <%= user.username %>!</h3>
+      <div class="main-content">
+        <div class="form-container">
+          <form action="/tasks/add" method="post">
+            <p>Task Name</p>
+            <% if (error) { %>
+              <p class="error"><%= error %></p>
+              <% } %>
+            <input type="text" name="name" placeholder="Enter your task" required />
+            <p>State</p>
+            <select name="state" required>
+              <option value="pending">Pending</option>
+              <option value="completed">Completed</option>
+            </select>
+            <button type="submit">Add Task</button>
+          </form>
+        </div>
+
+        <div class="task-list">
+          <h4>Your Tasks</h4>
+
+          <!-- Task Sorting -->
+          <form method="GET" action="/tasks" style="margin-bottom: 15px;">
+            <select name="state" id="filter" onchange="this.form.submit()">
+              <option value="" <%= state === '' ? 'selected' : '' %>>All</option>
+              <option value="pending" <%= state === 'pending' ? 'selected' : '' %>>Pending</option>
+              <option value="completed" <%= state === 'completed' ? 'selected' : '' %>>Completed</option>
+            </select>
+          </form>
+
+          <% if (tasks.length === 0) { %>
+          <p>No tasks available. Add a new task to get started.</p>
+          <% } else { %>
+          <ul>
+            <% tasks.forEach(function (task) { %>
+            <li>
+              <div style="flex: 0.5"><strong><%= task.name %></strong></div>
+              <div style="flex: 0.25; text-align: center;">
+                <span
+                  class="state-container <%= task.state === 'pending' ? 'state-pending' : 'state-completed' %>"
+                >
+                  <%= task.state %>
+                </span>
+              </div>
+              <div class="task-buttons" style="flex: 0.25; justify-content: flex-end;">
+                <% if (task.state === "pending") { %>
+                <form action="/tasks/<%= task._id %>" method="POST">
+                  <input type="hidden" name="_method" value="PUT" />
+                  <input type="hidden" name="state" value="completed" />
+                  <button type="submit"  >Complete</button>
+                </form>
+                <% } %>
+                <form action="/tasks/<%= task._id %>" method="POST">
+                  <input type="hidden" name="_method" value="DELETE" />
+                  <button class="delete">Delete</button>
+                </form>
+              </div>
+            </li>
+            <% }); %>
+          </ul>
+          <% } %>
+
+          <div class="logout-form">
+            <form action="/logout" method="POST">
+              <button type="submit">Logout</button>
+            </form>
+          </div>
+        </div>
+      </div>
+      <% } else { %>
+      <p>Please <a href="/login">log in</a> to view tasks.</p>
+      <% } %>
+    </div>
+  </body>
+</html>
